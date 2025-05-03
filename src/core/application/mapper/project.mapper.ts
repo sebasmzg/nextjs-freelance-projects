@@ -25,7 +25,7 @@ export const toProjectModel = (
         createdAt ?? new Date(),
         new Date(),
         userId,
-        dto.description ?? "",
+        dto.description ?? null,
     )
 }
 
