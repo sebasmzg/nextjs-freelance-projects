@@ -133,9 +133,11 @@ exports.Prisma.ProjectScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
-  ownerId: 'ownerId',
+  startDate: 'startDate',
+  deliveryDate: 'deliveryDate',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  userId: 'userId'
 };
 
 exports.Prisma.TaskScalarFieldEnum = {
@@ -156,6 +158,11 @@ exports.Prisma.SortOrder = {
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
 };
 exports.TaskStatus = exports.$Enums.TaskStatus = {
   PENDING: 'PENDING',
