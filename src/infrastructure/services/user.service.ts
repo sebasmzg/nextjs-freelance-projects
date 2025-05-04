@@ -22,7 +22,11 @@ export class UserService implements PUser {
     async findUserById(userId: string): Promise<UserModel | null> {
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            include: { projects: true },
+            include: { projects: {
+                include: {
+                    files:true
+                }
+            } },
         });
         if (!user) return null;
         return toUserModelFromDB(user);
@@ -31,7 +35,11 @@ export class UserService implements PUser {
     async findUserByEmail(email: string): Promise<UserModel | null> {
         const user = await prisma.user.findUnique({
             where: { email },
-            include: { projects: true },
+            include: { projects: {
+                include: {
+                    files:true
+                }
+            } },
         });
         if (!user) return null;
         return toUserModelFromDB(user);
