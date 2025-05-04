@@ -1,102 +1,98 @@
-import {PProject} from "../../core/application/ports/project.port";
-import {ProjectModel} from "../../core/application/model/project.model";
-import {prisma} from "../../lib/prisma";
-import {toProjectModel} from "../../core/application/mapper/project.mapper";
-import {ProjectToModel} from "../../core/application/dto/project.dto";
+import { PProject } from "../../core/application/ports/project.port";
+import { ProjectModel } from "../../core/application/model/project.model";
+import prisma from "../../lib/prisma";
+import { toProjectModelFromDB } from "../../core/application/mapper/project.mapper";
+import { EnumProjectStatus } from "../../core/application/dto/project.dto";
 
 export class ProjectService implements PProject {
-    async createProject(project: ProjectModel): Promise<ProjectModel> {
-        const created = await prisma.project.create({
-            data: {
-                id: project.id,
-                title: project.title,
-                description: project.description || "",
-                startDate: project.startDate,
-                deliveryDate: project.deliveryDate,
-                userId: project.userId,
-            }
-        });
+  async createProject(project: ProjectModel): Promise<ProjectModel> {
+    
+    const created = await prisma.project.create({
+      data: {
+        title: project.title,
+        description: project.description || null,
+        status: project.status,
+        startDate: project.startDate,
+        deliveryDate: project.deliveryDate,
+        userId: project.userId,
+      },
+      include: {
+        files: true,
+      },
+    });
 
-        return toProjectModel({
-                title: created.title,
-                description: created.description,
-                startDate: created.startDate.toISOString(),
-                deliveryDate: created.deliveryDate.toISOString(),
-            },
-            created.userId,
-            created.id,
-            created.createdAt
-        );
+    return toProjectModelFromDB(created);
+  }
+
+  async findProjectById(projectId: string): Promise<ProjectModel | null> {
+    if (!projectId || typeof projectId !== "string") {
+      return null;
     }
 
-    async findProjectById(projectId: string): Promise<ProjectModel | null> {
-        const project = await prisma.project.findUnique({
-            where: {
-                id: projectId
-            }
-        });
-        if (!project) return null;
-        return toProjectModel({
-                title: project.title,
-                description: project.description,
-                startDate: project.startDate.toISOString(),
-                deliveryDate: project.deliveryDate.toISOString(),
-            },
-            project.userId,
-            project.id,
-            project.createdAt
-        );
-    }
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      include: { files: true },
+    });
 
-    async findAllProjectsByUser(userId: string): Promise<ProjectModel[]> {
-        const projects = await prisma.project.findMany({
-            where: {
-                userId: userId
-            },
-            orderBy: {
-                createdAt: "desc"
-            }
-        });
-        return projects.map((p: ProjectToModel) => {
-            toProjectModel({
-                    title: p.title,
-                    description: p.description,
-                    startDate: p.startDate.toISOString(),
-                    deliveryDate: p.deliveryDate.toISOString(),
-                },
-                p.userId,
-                p.id,
-                p.createdAt
-            );
-        })
-    }
+    if (!project) return null;
 
-    async updateProject(project: ProjectModel): Promise<ProjectModel> {
-        const updated = await prisma.project.update({
-            where: {
-                id: project.id
-            },
-            data: {
-                title: project.title,
-                description: project.description,
-                startDate: project.startDate,
-                deliveryDate: project.deliveryDate,
-                updatedAt: new Date(),
-            }
-        });
-        return toProjectModel({
-                title: updated.title,
-                description: updated.description,
-                startDate: updated.startDate.toISOString(),
-                deliveryDate: updated.deliveryDate.toISOString(),
-            },
-            updated.userId,
-            updated.id,
-            updated.createdAt
-        );
-    }
+    return toProjectModelFromDB(project);
+  }
 
-    async deleteProject(projectId: string): Promise<void> {
-        await prisma.project.delete({where: {id: projectId}});
+  async findAllProjectsByUser(userId: string): Promise<ProjectModel[]> {
+    if (!userId || typeof userId !== "string") {
+      return [];
     }
+    const projects = await prisma.project.findMany({
+      where: { userId },
+      include: { files: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return projects.map(toProjectModelFromDB);
+  }
+
+  async updateProject(project: ProjectModel): Promise<ProjectModel> {
+    if (!project || !project.id) {
+      throw new Error("Invalid project data");
+    }
+    const updated = await prisma.project.update({
+      where: { id: project.id },
+      data: {
+        title: project.title,
+        description: project.description || null,
+        startDate: project.startDate,
+        deliveryDate: project.deliveryDate,
+        status: project.status,
+        updatedAt: new Date(),
+      },
+      include: {
+        files: true,
+      },
+    });
+
+    return toProjectModelFromDB(updated);
+  }
+
+  async deleteProject(projectId: string): Promise<void> {
+    if (!projectId || typeof projectId !== "string") {
+      throw new Error("Invalid project ID");
+    }
+    try {
+        await prisma.project.delete({ where: { id: projectId } });
+    } catch (error) {
+        const prismaError = error as { code?: string; message: string };
+        if (prismaError.code === 'P2025') {
+            throw new Error(`Project with id ${projectId} not found`);
+        }
+        throw error;
+    }
+  }
+
+  private validateProjectStatus(status: string): void {
+    const validStatuses = Object.values(EnumProjectStatus);
+    if (!validStatuses.includes(status as EnumProjectStatus)) {
+      throw new Error(`Invalid project status: ${status}. Valid values are: ${validStatuses.join(', ')}`);
+    }
+  }
 }

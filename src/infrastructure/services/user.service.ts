@@ -1,7 +1,7 @@
 import { PUser } from "../../core/application/ports/user.port";
 import { UserModel } from "../../core/application/model/user.model";
-import { prisma } from "../../lib/prisma";
-import { toUserModel } from "../../core/application/mapper/user.mapper";
+import prisma from "../../lib/prisma";
+import { toUserModelFromDB } from "../../core/application/mapper/user.mapper";
 
 export class UserService implements PUser {
     async createUser(user: UserModel): Promise<UserModel> {
@@ -16,15 +16,7 @@ export class UserService implements PUser {
             },
         });
 
-        return toUserModel({
-            id: created.id,
-            name: created.name,
-            email: created.email,
-            password: created.password,
-            createdAt: created.createdAt,
-            updatedAt: created.updatedAt,
-            projects: [],
-        });
+        return toUserModelFromDB({ ...created, projects: [] });
     }
 
     async findUserById(userId: string): Promise<UserModel | null> {
@@ -32,18 +24,8 @@ export class UserService implements PUser {
             where: { id: userId },
             include: { projects: true },
         });
-
         if (!user) return null;
-
-        return toUserModel({
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            password: user.password,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-            projects: user.projects,
-        });
+        return toUserModelFromDB(user);
     }
 
     async findUserByEmail(email: string): Promise<UserModel | null> {
@@ -51,18 +33,8 @@ export class UserService implements PUser {
             where: { email },
             include: { projects: true },
         });
-
         if (!user) return null;
-
-        return toUserModel({
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            password: user.password,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-            projects: user.projects,
-        });
+        return toUserModelFromDB(user);
     }
 
     async updateUser(user: UserModel): Promise<UserModel> {
@@ -76,15 +48,7 @@ export class UserService implements PUser {
             },
         });
 
-        return toUserModel({
-            id: updated.id,
-            name: updated.name,
-            email: updated.email,
-            password: updated.password,
-            createdAt: updated.createdAt,
-            updatedAt: updated.updatedAt,
-            projects: [],
-        });
+        return toUserModelFromDB({ ...updated, projects: [] });
     }
 
     async deleteUser(userId: string): Promise<void> {

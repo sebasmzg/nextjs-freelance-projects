@@ -133,11 +133,23 @@ exports.Prisma.ProjectScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
+  status: 'status',
   startDate: 'startDate',
   deliveryDate: 'deliveryDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'
+};
+
+exports.Prisma.FileScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  path: 'path',
+  mimeType: 'mimeType',
+  size: 'size',
+  projectId: 'projectId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.TaskScalarFieldEnum = {
@@ -164,6 +176,15 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.ProjectStatus = exports.$Enums.ProjectStatus = {
+  DRAFT: 'DRAFT',
+  ACTIVE: 'ACTIVE',
+  ON_HOLD: 'ON_HOLD',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+  ARCHIVED: 'ARCHIVED'
+};
+
 exports.TaskStatus = exports.$Enums.TaskStatus = {
   PENDING: 'PENDING',
   IN_PROGRESS: 'IN_PROGRESS',
@@ -173,6 +194,7 @@ exports.TaskStatus = exports.$Enums.TaskStatus = {
 exports.Prisma.ModelName = {
   User: 'User',
   Project: 'Project',
+  File: 'File',
   Task: 'Task'
 };
 

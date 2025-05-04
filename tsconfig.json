@@ -24,19 +24,19 @@
     "baseUrl": "./src",
     "paths": {
       "@core/": [
-        "core/*"
+        "./src/core/*"
       ],
       "@infra": [
-        "infrastructure/*"
+        "./src/infrastructure/*"
       ],
       "@ui/": [
-        "ui/*"
+        "./src/ui/*"
       ],
       "@app/": [
-        "app/*"
+        "./src/app/*"
       ],
       "@lib/": [
-        "lib/*"
+        "./src/lib/*"
       ]
     }
   },
