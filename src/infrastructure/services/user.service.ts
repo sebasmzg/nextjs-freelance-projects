@@ -7,16 +7,14 @@ export class UserService implements PUser {
     async createUser(user: UserModel): Promise<UserModel> {
         const created = await prisma.user.create({
             data: {
-                id: user.id,
                 name: user.name,
                 email: user.email,
                 password: user.password,
-                createdAt: user.createdAt,
-                updatedAt: user.updatedAt,
             },
+            include: {projects: true}
         });
 
-        return toUserModelFromDB({ ...created, projects: [] });
+        return toUserModelFromDB({ ...created, projects: created.projects || [] });
     }
 
     async findUserById(userId: string): Promise<UserModel | null> {
@@ -51,9 +49,8 @@ export class UserService implements PUser {
             data: {
                 name: user.name,
                 email: user.email,
-                password: user.password,
-                updatedAt: new Date(),
             },
+            include: {projects: true}
         });
 
         return toUserModelFromDB({ ...updated, projects: [] });

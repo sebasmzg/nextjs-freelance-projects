@@ -33,8 +33,8 @@ export async function POST(req: Request){
         return NextResponse.json(
             { 
               success: false, 
-              message: "Error al registrar usuario", 
-              error: error instanceof Error ? error.message : String(error) 
+              message: "Error in register",
+              details: e instanceof Error ? e.message : String(e) 
             },
             { status: 400 }
           );
