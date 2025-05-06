@@ -1,67 +1,85 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import {useRouter} from "next/navigation";
+import React, {useState} from "react";
+import {DynamicForm} from "ui/organisms/DynamicForm";
+import { z } from "zod";
+import { registerSchema } from "lib/validation/form.schema"
+
+type RegisterFormData = z.infer<typeof registerSchema>
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+    const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
-      setLoading(false);
-      return;
-    }
+    const handleRegister = async (formData: RegisterFormData) => {
+        setError(null);
+        setLoading(true);
 
-    try {
-      const res = await fetch("api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
-      setSuccess(true);
-      setTimeout(() => router.push("/login"), 2000);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred. Please try again later.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+        const { name, email, password } = formData;
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+        if (password.length < 6) {
+            setError("Password must be at least 6 characters long.");
+            setLoading(false);
+            return;
+        }
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
+        try {
+            const res = await fetch("api/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({name, email, password}),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.message || "Registration failed");
+            }
+            setTimeout(() => router.push("/login"), 2000);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("An unexpected error occurred. Please try again later.");
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="w-full max-w-md space-y-8">
+                <div>
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                        Create your account
+                    </h2>
+                </div>
+                <DynamicForm
+                    type="register"
+                    onSubmit={handleRegister}
+                    isLoading={loading}
+                    globalError={error}
+                />
+                <p className="mt-4 text-center text-sm text-gray-600">
+                    Already have an account?{" "}
+                    <Link
+                        href="/login"
+                        className="font-medium text-indigo-600 hover:text-indigo-500"
+                    >
+                        Sign in
+                    </Link>
+                </p>
+            </div>
         </div>
-        <form
+    );
+}
+
+
+{/* <form
           onSubmit={handleSubmit}
           className="mt-8 space-y-6 bg-white p-8 shadow-lg rounded-lg"
         >
@@ -143,17 +161,5 @@ export default function RegisterPage() {
               {loading ? "Registering..." : "Create Account"}
             </button>
           </div>
-        </form>
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
-          >
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </div>
-  );
+        </form> */
 }

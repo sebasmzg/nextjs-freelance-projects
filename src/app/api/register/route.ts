@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { error } from "console";
 import { UserModel } from "core/application/model/user.model";
 import { UserService } from "infrastructure/services/user.service";
-import { registerSchema } from "lib/validation/register.schema";
+import { registerSchema } from "lib/validation/form.schema";
 import { NextResponse } from "next/server";
 
 const service = new UserService();

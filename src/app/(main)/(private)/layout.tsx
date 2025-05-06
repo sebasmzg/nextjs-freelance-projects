@@ -14,13 +14,11 @@ export default function DashboardLayout({
   const router = useRouter();
 
   const handleLogout = async () => {
-    // Redirect to login page after sign out is complete
+
     await signOut({ redirect: false, callbackUrl: '/login' });
-    // Force redirect if needed, though callbackUrl should handle it
     router.push('/');
   };
 
-  // Optional: Show loading state while session is being determined
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -29,20 +27,12 @@ export default function DashboardLayout({
     );
   }
 
-  // Optional: Redirect if not authenticated (though middleware should handle this)
-  if (status === 'unauthenticated') {
-     // router.push('/login'); // Can cause infinite loops if middleware isn't perfect
-     return <p className="p-4 text-center text-red-600">Access Denied. Redirecting...</p>; // Or a redirect component
-  }
-
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <h1 className="text-xl font-bold text-gray-900">
             My Dashboard
-            {/* Optional: Display user name */}
             {session?.user?.name && (
               <span className="text-sm font-normal text-gray-600 ml-2">
                 (Welcome, {session.user.name})
@@ -58,10 +48,8 @@ export default function DashboardLayout({
         </div>
       </header>
 
-      {/* Main Content Area */}
       <main>
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          {/* Page content goes here */}
           {children}
         </div>
       </main>
